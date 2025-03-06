@@ -1,5 +1,10 @@
 import glob from 'fast-glob'
 import { Layout } from '@/components/Layout'
+import { locales, defaultLocale } from "@/lib/locales";
+
+export async function generateStaticParams() {
+    return locales.map((locale) => ({ locale }));
+}
 
 export default async function LocaleLayout({ children, params: { locale } }) {
   let pages = await glob(`**/*.${locale}.mdx`, { cwd: `src/app/[locale]` })
@@ -26,10 +31,3 @@ export default async function LocaleLayout({ children, params: { locale } }) {
     </Layout>
   )
 }
-
-export async function generateStaticParams() {
-  return [
-    { locale: 'ko' },
-    { locale: 'en' }
-  ]
-} 
