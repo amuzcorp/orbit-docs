@@ -209,7 +209,7 @@ function NavigationGroup({ group, className }) {
 
 export const navigation = [
   {
-    title: 'AMUZ CMS - Orbit',
+    title: 'Prologue',
     links: [
       { title: 'Introduction', href: '/' },
       { title: 'Quickstart', href: '/quickstart' },
