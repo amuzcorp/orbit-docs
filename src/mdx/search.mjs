@@ -53,7 +53,7 @@ export default function Search(nextConfig = {}) {
         test: __filename,
         use: [
           createLoader(function () {
-            let appDir = path.resolve('./src/app')
+            let appDir = path.resolve('./src/app/[locale]')
             this.addContextDependency(appDir)
 
             let files = glob.sync('**/*.mdx', { cwd: appDir })

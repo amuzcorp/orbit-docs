@@ -21,6 +21,8 @@ import { navigation } from '@/components/Navigation'
 function useAutocomplete({ close }) {
   let id = useId()
   let router = useRouter()
+  let pathname = usePathname()
+  let searchParams = useSearchParams()
   let [autocompleteState, setAutocompleteState] = useState({})
 
   function navigate({ itemUrl }) {
@@ -53,15 +55,29 @@ function useAutocomplete({ close }) {
         navigate,
       },
       getSources({ query }) {
+        const locale = pathname.split('/')[1];
         return import('@/mdx/search.mjs').then(({ search }) => {
           return [
             {
               sourceId: 'documentation',
               getItems() {
-                return search(query, { limit: 5 })
+                return search(query, { limit: 5, locale })
               },
               getItemUrl({ item }) {
-                return item.url
+                const locale = pathname.split('/')[1];
+                let pathName = item.url
+                  .replace('[locale]/', '')
+                  .replace(new RegExp(`(^|/)page\\..*\\.mdx(?=#|$)`), '')
+                  .replace(/(^|\/)index$/, '')
+                  .replace(/\/$/, '')
+                let fullPath;
+                console.log("filtered path" , pathName);
+                if (pathName === "") {
+                  fullPath = '/' + locale;
+                } else {
+                  fullPath = '/' + locale + '/' + pathName;
+                }
+                return fullPath;
               },
               onSelect: navigate,
             },
