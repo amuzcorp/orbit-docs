@@ -1,0 +1,108 @@
+export const metadata = {
+  title: '멀티사이트',
+  description: 'CMS-Orbit의 멀티사이트 기능에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: '개요', id: 'overview' },
+  { title: '사이트 생성', id: 'site-creation' },
+  { title: '사이트 관리', id: 'site-management' },
+  { title: '사이트 설정', id: 'site-settings' },
+  { title: '사이트 스케일링', id: 'site-scaling' },
+  { title: '사이트 통합', id: 'site-integration' },
+]
+
+# 멀티사이트
+
+CMS-Orbit의 멀티사이트 기능을 통해 여러 웹사이트를 하나의 시스템에서 효율적으로 관리할 수 있습니다. {{ className: 'lead' }}
+
+## 개요
+
+멀티사이트 기능은 다음과 같은 주요 특징을 제공합니다:
+
+- **독립적인 사이트 관리**: 각 사이트는 독립적인 설정과 데이터를 가집니다.
+- **리소스 공유**: 공통 리소스와 코드를 효율적으로 공유합니다.
+- **확장성**: 필요에 따라 사이트를 추가하거나 제거할 수 있습니다.
+- **보안**: 각 사이트는 격리된 환경에서 실행됩니다.
+
+## 사이트 생성
+
+```php {{ title: '사이트 생성' }}
+use Orbit\Tenancy\Tenant;
+
+// 새 사이트 생성
+$tenant = Tenant::create([
+    'id' => 'site-a',
+    'name' => 'Site A',
+    'domain' => 'site-a.example.com',
+    'database' => [
+        'connection' => 'tenant',
+        'name' => 'tenant_site_a',
+    ],
+]);
+
+// 사이트 초기화
+$tenant->initialize();
+```
+
+## 사이트 관리
+
+```php {{ title: '사이트 관리' }}
+use Orbit\Tenancy\Tenant;
+
+// 사이트 조회
+$tenant = Tenant::find('site-a');
+
+// 사이트 설정
+$tenant->settings()->set([
+    'app_name' => 'Site A',
+    'timezone' => 'Asia/Seoul',
+    'locale' => 'ko',
+]);
+
+// 사이트 상태 확인
+$status = $tenant->status();
+```
+
+## 사이트 설정
+
+```php {{ title: '사이트 설정' }}
+// config/tenancy.php
+return [
+    'tenant' => [
+        'default' => [
+            'app' => [
+                'name' => 'Default Site',
+                'env' => 'production',
+                'debug' => false,
+            ],
+            'database' => [
+                'connection' => 'tenant',
+                'prefix' => 'tenant_',
+            ],
+        ],
+    ],
+];
+```
+
+## 사이트 스케일링
+
+멀티사이트 환경에서 각 사이트의 리소스를 효율적으로 관리할 수 있습니다:
+
+- **수평적 스케일링**: 서버 인스턴스 추가
+- **수직적 스케일링**: 리소스 업그레이드
+- **로드 밸런싱**: 트래픽 분산
+
+## 사이트 통합
+
+여러 사이트 간의 통합 기능을 제공합니다:
+
+- **사용자 통합**: 단일 로그인 시스템
+- **데이터 동기화**: 사이트 간 데이터 공유
+- **API 통합**: 사이트 간 API 연동
+
+<div className="not-prose">
+  <Button href="/multi-site/site-creation" variant="text" arrow="right">
+    <>사이트 생성 알아보기</>
+  </Button>
+</div> 

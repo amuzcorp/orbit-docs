@@ -1,0 +1,272 @@
+export const metadata = {
+  title: '사이트 모니터링',
+  description: 'CMS-Orbit의 사이트 모니터링 기능에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: '성능 모니터링', id: 'performance-monitoring' },
+  { title: '오류 모니터링', id: 'error-monitoring' },
+  { title: '사용자 모니터링', id: 'user-monitoring' },
+]
+
+# 사이트 모니터링
+
+CMS-Orbit의 모니터링 기능을 통해 각 사이트의 성능, 오류, 사용자 활동을 추적하고 분석할 수 있습니다. {{ className: 'lead' }}
+
+## 성능 모니터링
+
+### 성능 메트릭 수집
+
+```php {{ title: '성능 메트릭 수집' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 성능 메트릭 수집
+$metrics = [
+    'response_time' => microtime(true) - LARAVEL_START,
+    'memory_usage' => memory_get_usage(),
+    'query_count' => DB::getQueryLog()->count(),
+    'cache_hits' => Cache::getStats()['hits'],
+    'cache_misses' => Cache::getStats()['misses'],
+];
+
+// 메트릭 저장
+$tenant->metrics()->create([
+    'type' => 'performance',
+    'data' => $metrics,
+    'timestamp' => now(),
+]);
+```
+
+### 성능 대시보드
+
+```php {{ title: '성능 대시보드' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 성능 데이터 조회
+$performance = $tenant->metrics()
+    ->where('type', 'performance')
+    ->whereBetween('timestamp', [
+        now()->subDays(7),
+        now(),
+    ])
+    ->get();
+
+// 성능 통계
+$stats = [
+    'avg_response_time' => $performance->avg('data.response_time'),
+    'max_memory_usage' => $performance->max('data.memory_usage'),
+    'total_queries' => $performance->sum('data.query_count'),
+];
+```
+
+### 성능 알림
+
+```php {{ title: '성능 알림' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 성능 임계값 설정
+$thresholds = [
+    'response_time' => 1000, // ms
+    'memory_usage' => 128 * 1024 * 1024, // 128MB
+    'query_count' => 100,
+];
+
+// 성능 모니터링
+$metrics = $tenant->metrics()
+    ->where('type', 'performance')
+    ->latest()
+    ->first();
+
+if ($metrics->data['response_time'] > $thresholds['response_time']) {
+    // 알림 발송
+    Notification::send($tenant->users, new PerformanceAlert([
+        'metric' => 'response_time',
+        'value' => $metrics->data['response_time'],
+        'threshold' => $thresholds['response_time'],
+    ]));
+}
+```
+
+## 오류 모니터링
+
+### 오류 로깅
+
+```php {{ title: '오류 로깅' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 오류 로깅
+try {
+    // 코드 실행
+} catch (\Exception $e) {
+    $tenant->errors()->create([
+        'type' => get_class($e),
+        'message' => $e->getMessage(),
+        'file' => $e->getFile(),
+        'line' => $e->getLine(),
+        'trace' => $e->getTraceAsString(),
+        'context' => [
+            'user_id' => Auth::id(),
+            'url' => request()->url(),
+            'method' => request()->method(),
+        ],
+    ]);
+}
+```
+
+### 오류 대시보드
+
+```php {{ title: '오류 대시보드' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 오류 통계
+$stats = $tenant->errors()
+    ->whereBetween('created_at', [
+        now()->subDays(7),
+        now(),
+    ])
+    ->selectRaw('type, count(*) as count')
+    ->groupBy('type')
+    ->get();
+
+// 오류 추세
+$trends = $tenant->errors()
+    ->selectRaw('date(created_at) as date, count(*) as count')
+    ->groupBy('date')
+    ->orderBy('date')
+    ->get();
+```
+
+### 오류 알림
+
+```php {{ title: '오류 알림' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 오류 임계값 설정
+$thresholds = [
+    'critical' => 10,
+    'error' => 50,
+    'warning' => 100,
+];
+
+// 오류 모니터링
+$errors = $tenant->errors()
+    ->where('created_at', '>=', now()->subHour())
+    ->count();
+
+if ($errors > $thresholds['critical']) {
+    // 알림 발송
+    Notification::send($tenant->users, new ErrorAlert([
+        'count' => $errors,
+        'threshold' => $thresholds['critical'],
+        'period' => 'last hour',
+    ]));
+}
+```
+
+## 사용자 모니터링
+
+### 사용자 활동 로깅
+
+```php {{ title: '사용자 활동 로깅' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사용자 활동 로깅
+$tenant->activities()->create([
+    'user_id' => Auth::id(),
+    'type' => 'login',
+    'description' => 'User logged in',
+    'ip_address' => request()->ip(),
+    'user_agent' => request()->userAgent(),
+    'context' => [
+        'url' => request()->url(),
+        'method' => request()->method(),
+    ],
+]);
+```
+
+### 사용자 대시보드
+
+```php {{ title: '사용자 대시보드' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사용자 통계
+$stats = $tenant->activities()
+    ->whereBetween('created_at', [
+        now()->subDays(7),
+        now(),
+    ])
+    ->selectRaw('type, count(*) as count')
+    ->groupBy('type')
+    ->get();
+
+// 사용자 추세
+$trends = $tenant->activities()
+    ->selectRaw('date(created_at) as date, count(*) as count')
+    ->groupBy('date')
+    ->orderBy('date')
+    ->get();
+```
+
+### 사용자 알림
+
+```php {{ title: '사용자 알림' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사용자 활동 임계값 설정
+$thresholds = [
+    'login_attempts' => 5,
+    'page_views' => 1000,
+    'api_calls' => 100,
+];
+
+// 사용자 활동 모니터링
+$activities = $tenant->activities()
+    ->where('created_at', '>=', now()->subHour())
+    ->count();
+
+if ($activities > $thresholds['page_views']) {
+    // 알림 발송
+    Notification::send($tenant->users, new ActivityAlert([
+        'count' => $activities,
+        'threshold' => $thresholds['page_views'],
+        'period' => 'last hour',
+    ]));
+}
+```
+
+### 모니터링 명령어
+
+```bash {{ title: '모니터링 명령어' }}
+# 성능 메트릭 수집
+php artisan tenancy:metrics-collect
+
+# 오류 로그 분석
+php artisan tenancy:errors-analyze
+
+# 사용자 활동 보고서 생성
+php artisan tenancy:activities-report
+```
+
+<div className="not-prose">
+  <Button href="/multi-site/scaling" variant="text" arrow="right">
+    <>사이트 스케일링 알아보기</>
+  </Button>
+</div> 

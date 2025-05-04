@@ -1,0 +1,230 @@
+export const metadata = {
+  title: '사이트 스케일링',
+  description: 'CMS-Orbit의 사이트 스케일링 기능에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: '수평적 스케일링', id: 'horizontal-scaling' },
+  { title: '수직적 스케일링', id: 'vertical-scaling' },
+  { title: '로드 밸런싱', id: 'load-balancing' },
+]
+
+# 사이트 스케일링
+
+CMS-Orbit의 스케일링 기능을 통해 각 사이트의 트래픽과 리소스 사용을 효율적으로 관리할 수 있습니다. {{ className: 'lead' }}
+
+## 수평적 스케일링
+
+### 서버 확장
+
+```php {{ title: '서버 확장 설정' }}
+// config/tenancy.php
+return [
+    'scaling' => [
+        'horizontal' => [
+            'enabled' => true,
+            'servers' => [
+                'web' => [
+                    'count' => 3,
+                    'type' => 't3.medium',
+                ],
+                'worker' => [
+                    'count' => 2,
+                    'type' => 't3.small',
+                ],
+            ],
+        ],
+    ],
+];
+```
+
+### 데이터베이스 샤딩
+
+```php {{ title: '데이터베이스 샤딩' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 샤드 키 설정
+$tenant->database()->setShardKey('id');
+
+// 샤드 생성
+$tenant->database()->createShard([
+    'name' => 'shard_1',
+    'connection' => [
+        'host' => 'db1.example.com',
+        'database' => 'tenant_site_a_shard_1',
+    ],
+]);
+
+// 샤드 간 데이터 마이그레이션
+$tenant->database()->migrateShard('shard_1', 'shard_2', [
+    'table' => 'posts',
+    'where' => ['created_at', '>', now()->subMonths(6)],
+]);
+```
+
+### 캐시 분산
+
+```php {{ title: '캐시 분산' }}
+// config/tenancy.php
+return [
+    'cache' => [
+        'driver' => 'redis',
+        'cluster' => [
+            'enabled' => true,
+            'nodes' => [
+                'redis1.example.com:6379',
+                'redis2.example.com:6379',
+                'redis3.example.com:6379',
+            ],
+        ],
+    ],
+];
+```
+
+## 수직적 스케일링
+
+### 리소스 확장
+
+```php {{ title: '리소스 확장 설정' }}
+// config/tenancy.php
+return [
+    'scaling' => [
+        'vertical' => [
+            'enabled' => true,
+            'resources' => [
+                'cpu' => 4,
+                'memory' => '8G',
+                'storage' => '100G',
+            ],
+            'auto_scale' => [
+                'enabled' => true,
+                'threshold' => 80,
+                'step' => 25,
+            ],
+        ],
+    ],
+];
+```
+
+### 데이터베이스 최적화
+
+```php {{ title: '데이터베이스 최적화' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 인덱스 최적화
+$tenant->database()->optimizeIndexes([
+    'posts' => [
+        'title' => 'fulltext',
+        'status' => 'btree',
+    ],
+]);
+
+// 파티셔닝
+$tenant->database()->partitionTable('posts', [
+    'type' => 'range',
+    'column' => 'created_at',
+    'partitions' => [
+        ['name' => 'p1', 'value' => '2024-01-01'],
+        ['name' => 'p2', 'value' => '2024-07-01'],
+    ],
+]);
+```
+
+### 캐시 최적화
+
+```php {{ title: '캐시 최적화' }}
+// config/tenancy.php
+return [
+    'cache' => [
+        'optimization' => [
+            'enabled' => true,
+            'memory_limit' => '2G',
+            'max_items' => 1000000,
+            'ttl' => 3600,
+        ],
+    ],
+];
+```
+
+## 로드 밸런싱
+
+### 로드 밸런서 설정
+
+```php {{ title: '로드 밸런서 설정' }}
+// config/tenancy.php
+return [
+    'load_balancing' => [
+        'enabled' => true,
+        'algorithm' => 'round_robin',
+        'health_check' => [
+            'enabled' => true,
+            'interval' => 30,
+            'timeout' => 5,
+            'path' => '/health',
+        ],
+        'servers' => [
+            'web1.example.com',
+            'web2.example.com',
+            'web3.example.com',
+        ],
+    ],
+];
+```
+
+### 세션 관리
+
+```php {{ title: '세션 관리' }}
+// config/tenancy.php
+return [
+    'session' => [
+        'driver' => 'redis',
+        'connection' => 'session',
+        'lifetime' => 120,
+        'expire_on_close' => false,
+        'encrypt' => true,
+        'cookie' => 'tenant_session',
+    ],
+];
+```
+
+### SSL/TLS 종료
+
+```php {{ title: 'SSL/TLS 종료' }}
+// config/tenancy.php
+return [
+    'ssl' => [
+        'termination' => [
+            'enabled' => true,
+            'certificate' => [
+                'path' => 'ssl/certificate.pem',
+                'key' => 'ssl/private.key',
+            ],
+            'protocols' => ['TLSv1.2', 'TLSv1.3'],
+            'ciphers' => 'HIGH:!aNULL:!MD5',
+        ],
+    ],
+];
+```
+
+### 스케일링 명령어
+
+```bash {{ title: '스케일링 명령어' }}
+# 서버 확장
+php artisan tenancy:scale-horizontal --servers=3
+
+# 리소스 확장
+php artisan tenancy:scale-vertical --cpu=4 --memory=8G
+
+# 로드 밸런서 설정
+php artisan tenancy:load-balancer --algorithm=round_robin
+```
+
+<div className="not-prose">
+  <Button href="/multi-site/integration" variant="text" arrow="right">
+    <>사이트 통합 알아보기</>
+  </Button>
+</div> 

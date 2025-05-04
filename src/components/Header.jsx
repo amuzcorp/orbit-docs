@@ -20,13 +20,15 @@ import { LanguageSelector } from '@/components/LanguageSelector'
 function TopLevelNavItem({ href, children }) {
   const params = useParams()
   const locale = params?.locale || 'ko'
-  
+
+  const isExternalLink = href.startsWith('http')
   const localizedHref = href === '/' ? `/${locale}` : `/${locale}${href}`
   
   return (
     <li>
       <Link
-        href={localizedHref}
+        href={isExternalLink ? href : localizedHref}
+        target={isExternalLink ? '_blank' : undefined}
         className="text-sm/5 text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
       >
         {children}
@@ -82,6 +84,7 @@ export const Header = forwardRef(function Header({ className, ...props }, ref) {
         <nav className="hidden md:block">
           <ul role="list" className="flex items-center gap-8">
             <TopLevelNavItem href="/">Documentation</TopLevelNavItem>
+            <TopLevelNavItem href="https://amuz.co.kr" target={'_blank'}>Amuz Official</TopLevelNavItem>
           </ul>
         </nav>
         <div className="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15" />

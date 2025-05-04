@@ -1,0 +1,326 @@
+export const metadata = {
+  title: '기본 관계',
+  description: 'CMS-Orbit의 기본 관계(Relationships)에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: '일대일 관계', id: 'one-to-one' },
+  { title: '일대다 관계', id: 'one-to-many' },
+  { title: '다대다 관계', id: 'many-to-many' },
+  { title: '다형성 관계', id: 'polymorphic' },
+  { title: '관계 이벤트', id: 'relationship-events' },
+]
+
+# 기본 관계
+
+CMS-Orbit에서 모델 간의 관계를 정의하고 관리하는 방법을 알아봅니다. {{ className: 'lead' }}
+
+## 일대일 관계
+
+### 관계 정의
+
+```php {{ title: '일대일 관계 정의' }}
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+    public function profile()
+    {
+        return $this->hasOne(Profile::class);
+    }
+}
+
+class Profile extends Model
+{
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+```
+
+### 관계 메서드
+
+- **hasOne**: 일대일 관계 정의
+- **belongsTo**: 역방향 관계 정의
+- **with**: 관계 로딩
+- **load**: 지연 로딩
+
+### 관계 쿼리
+
+```php {{ title: '일대일 관계 쿼리' }}
+// 관계 로딩
+$user = User::with('profile')->find(1);
+
+// 관계 접근
+$profile = $user->profile;
+
+// 역방향 관계
+$user = $profile->user;
+```
+
+### 예제: 사용자와 프로필
+
+```php {{ title: '사용자와 프로필 예제' }}
+// 프로필 생성
+$user->profile()->create([
+    'bio' => '소개글',
+    'avatar' => 'avatar.jpg'
+]);
+
+// 프로필 업데이트
+$user->profile()->update([
+    'bio' => '수정된 소개글'
+]);
+
+// 프로필 삭제
+$user->profile()->delete();
+```
+
+## 일대다 관계
+
+### 관계 정의
+
+```php {{ title: '일대다 관계 정의' }}
+class Post extends Model
+{
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+}
+
+class Comment extends Model
+{
+    public function post()
+    {
+        return $this->belongsTo(Post::class);
+    }
+}
+```
+
+### 관계 메서드
+
+- **hasMany**: 일대다 관계 정의
+- **belongsTo**: 역방향 관계 정의
+- **withCount**: 관계 개수 로딩
+- **whereHas**: 관계 조건 검색
+
+### 관계 쿼리
+
+```php {{ title: '일대다 관계 쿼리' }}
+// 모든 댓글 로딩
+$post = Post::with('comments')->find(1);
+
+// 특정 조건의 댓글
+$comments = $post->comments()
+    ->where('approved', true)
+    ->get();
+
+// 댓글 개수
+$count = $post->comments()->count();
+```
+
+### 예제: 카테고리와 문서
+
+```php {{ title: '카테고리와 문서 예제' }}
+// 문서 생성
+$category->documents()->create([
+    'title' => '새 문서',
+    'content' => '문서 내용'
+]);
+
+// 문서 업데이트
+$category->documents()
+    ->where('id', 1)
+    ->update(['title' => '수정된 제목']);
+
+// 문서 삭제
+$category->documents()->delete();
+```
+
+## 다대다 관계
+
+### 관계 정의
+
+```php {{ title: '다대다 관계 정의' }}
+class Post extends Model
+{
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+}
+
+class Tag extends Model
+{
+    public function posts()
+    {
+        return $this->belongsToMany(Post::class);
+    }
+}
+```
+
+### 관계 메서드
+
+- **belongsToMany**: 다대다 관계 정의
+- **attach**: 관계 추가
+- **detach**: 관계 제거
+- **sync**: 관계 동기화
+
+### 관계 쿼리
+
+```php {{ title: '다대다 관계 쿼리' }}
+// 태그 로딩
+$post = Post::with('tags')->find(1);
+
+// 태그 추가
+$post->tags()->attach(1);
+
+// 태그 제거
+$post->tags()->detach(1);
+
+// 태그 동기화
+$post->tags()->sync([1, 2, 3]);
+```
+
+### 예제: 문서와 태그
+
+```php {{ title: '문서와 태그 예제' }}
+// 태그 추가
+$document->tags()->attach([
+    1 => ['created_at' => now()],
+    2 => ['created_at' => now()]
+]);
+
+// 태그 제거
+$document->tags()->detach([1, 2]);
+
+// 태그 동기화
+$document->tags()->sync([
+    1 => ['created_at' => now()],
+    2 => ['created_at' => now()]
+]);
+```
+
+## 다형성 관계
+
+### 관계 정의
+
+```php {{ title: '다형성 관계 정의' }}
+class Comment extends Model
+{
+    public function commentable()
+    {
+        return $this->morphTo();
+    }
+}
+
+class Post extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+}
+
+class Video extends Model
+{
+    public function comments()
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+}
+```
+
+### 관계 메서드
+
+- **morphTo**: 다형성 관계 정의
+- **morphMany**: 다형성 일대다 관계
+- **morphOne**: 다형성 일대일 관계
+- **morphToMany**: 다형성 다대다 관계
+
+### 관계 쿼리
+
+```php {{ title: '다형성 관계 쿼리' }}
+// 댓글 로딩
+$post = Post::with('comments')->find(1);
+
+// 댓글 생성
+$post->comments()->create([
+    'content' => '댓글 내용'
+]);
+
+// 댓글 삭제
+$post->comments()->delete();
+```
+
+### 예제: 댓글 시스템
+
+```php {{ title: '댓글 시스템 예제' }}
+// 댓글 생성
+$post->comments()->create([
+    'content' => '포스트 댓글',
+    'user_id' => 1
+]);
+
+$video->comments()->create([
+    'content' => '비디오 댓글',
+    'user_id' => 1
+]);
+
+// 댓글 조회
+$comments = Comment::where('commentable_type', Post::class)
+    ->where('commentable_id', 1)
+    ->get();
+```
+
+## 관계 이벤트
+
+### 관계 생성 이벤트
+
+```php {{ title: '관계 생성 이벤트' }}
+class Post extends Model
+{
+    protected static function booted()
+    {
+        static::created(function ($post) {
+            // 관계 생성 시 실행할 로직
+        });
+    }
+}
+```
+
+### 관계 삭제 이벤트
+
+```php {{ title: '관계 삭제 이벤트' }}
+class Post extends Model
+{
+    protected static function booted()
+    {
+        static::deleted(function ($post) {
+            // 관계 삭제 시 실행할 로직
+        });
+    }
+}
+```
+
+### 관계 업데이트 이벤트
+
+```php {{ title: '관계 업데이트 이벤트' }}
+class Post extends Model
+{
+    protected static function booted()
+    {
+        static::updated(function ($post) {
+            // 관계 업데이트 시 실행할 로직
+        });
+    }
+}
+```
+
+<div className="not-prose">
+  <Button href="/data-types/models" variant="text" arrow="right">
+    <>모델 알아보기</>
+  </Button>
+</div> 

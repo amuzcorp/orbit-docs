@@ -9,8 +9,8 @@ const inter = Inter({
 
 export const metadata = {
   title: {
-    template: '%s - AMUZ CMS - Orbit',
-    default: 'CMS Orbit Documentation',
+    template: '%s - CMS Orbit',
+    default: 'Documentation',
   },
 }
 

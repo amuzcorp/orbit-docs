@@ -1,0 +1,120 @@
+export const metadata = {
+  title: '테넌시 (Tenancy)',
+  description:
+    'CMS-Orbit는 Laravel Tenancy v4를 기반으로 한 강력한 멀티테넌시 기능을 제공합니다. 데이터베이스 격리, 파일 시스템 격리, 캐시 격리 등을 통해 각 테넌트의 데이터를 안전하게 관리할 수 있습니다.',
+}
+
+export const sections = [
+  { title: '주요 특징', id: 'key-features' },
+  { title: '테넌트 생성하기', id: 'creating-tenants' },
+  { title: '테넌트 설정', id: 'tenant-configuration' },
+  { title: '테넌트 인식', id: 'tenant-identification' },
+  { title: '테넌트 이벤트', id: 'tenant-events' },
+  { title: '테넌트 미들웨어', id: 'tenant-middleware' },
+]
+
+# 테넌시 (Tenancy)
+
+CMS-Orbit는 Laravel Tenancy v4를 기반으로 한 강력한 멀티테넌시 기능을 제공합니다. 각 테넌트는 독립된 데이터베이스, 파일 시스템, 캐시를 가지며, 완전히 격리된 환경에서 운영됩니다. {{ className: 'lead' }}
+
+## 주요 특징
+
+CMS-Orbit의 테넌시 기능은 다음과 같은 특징을 가지고 있습니다:
+
+1. **데이터베이스 격리**: 각 테넌트는 독립된 데이터베이스를 가집니다.
+2. **파일 시스템 격리**: 각 테넌트는 독립된 파일 시스템을 가집니다.
+3. **캐시 격리**: 각 테넌트는 독립된 캐시를 가집니다.
+4. **세션 격리**: 각 테넌트는 독립된 세션을 가집니다.
+
+## 테넌트 생성하기
+
+테넌트를 생성하는 가장 간단한 방법은 `tenancy:create` 아티즌 명령어를 사용하는 것입니다:
+
+```bash {{ title: '테넌트 생성 명령어' }}
+php artisan tenancy:create example.com
+```
+
+이 명령어는 다음과 같은 작업을 수행합니다:
+
+1. 테넌트 데이터베이스 생성
+2. 테넌트 마이그레이션 실행
+3. 테넌트 설정 파일 생성
+
+## 테넌트 설정
+
+테넌트 설정은 `config/tenancy.php` 파일에서 관리할 수 있습니다:
+
+```php {{ title: '테넌트 설정 예제' }}
+return [
+    'tenant' => [
+        'database' => [
+            'prefix' => 'tenant_',
+            'suffix' => '',
+        ],
+        'filesystem' => [
+            'disk' => 'tenant',
+            'path' => 'tenants/{tenant_id}',
+        ],
+        'cache' => [
+            'prefix' => 'tenant_',
+        ],
+    ],
+];
+```
+
+## 테넌트 인식
+
+현재 테넌트를 인식하는 방법은 다음과 같습니다:
+
+```php {{ title: '테넌트 인식 예제' }}
+use Illuminate\Support\Facades\Tenancy;
+
+// 현재 테넌트 가져오기
+$tenant = Tenancy::current();
+
+// 테넌트 ID 가져오기
+$tenantId = Tenancy::current()->id;
+
+// 테넌트 도메인 가져오기
+$domain = Tenancy::current()->domain;
+```
+
+## 테넌트 이벤트
+
+테넌트 관련 이벤트를 수신할 수 있습니다:
+
+```php {{ title: '테넌트 이벤트 예제' }}
+use Stancl\Tenancy\Events\TenantCreated;
+use Stancl\Tenancy\Events\TenantDeleted;
+
+Event::listen(TenantCreated::class, function ($event) {
+    // 테넌트가 생성될 때 실행할 작업
+});
+
+Event::listen(TenantDeleted::class, function ($event) {
+    // 테넌트가 삭제될 때 실행할 작업
+});
+```
+
+## 테넌트 미들웨어
+
+테넌트 관련 미들웨어를 사용할 수 있습니다:
+
+```php {{ title: '테넌트 미들웨어 예제' }}
+use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
+use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
+
+Route::middleware([
+    'web',
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->group(function () {
+    // 테넌트 라우트
+});
+```
+
+<div className="not-prose">
+  <Button href="/core-concepts/site-configs" variant="text" arrow="right">
+    <>사이트 설정 개념 알아보기</>
+  </Button>
+</div> 

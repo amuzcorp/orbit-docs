@@ -1,0 +1,256 @@
+export const metadata = {
+  title: 'API 참조',
+  description: 'CMS-Orbit의 멀티사이트 API 참조를 알아봅니다.',
+}
+
+export const sections = [
+  { title: '테넌트 API', id: 'tenant-api' },
+  { title: '데이터베이스 API', id: 'database-api' },
+  { title: '파일 시스템 API', id: 'filesystem-api' },
+]
+
+# API 참조
+
+CMS-Orbit의 멀티사이트 기능에 대한 API 참조를 알아봅니다. {{ className: 'lead' }}
+
+## 테넌트 API
+
+### 테넌트 생성
+
+```php {{ title: '테넌트 생성' }}
+use Orbit\Tenancy\Tenant;
+
+// 테넌트 생성
+$tenant = Tenant::create([
+    'name' => '사이트 이름',
+    'domain' => 'example.com',
+    'settings' => [
+        'theme' => 'default',
+        'locale' => 'ko',
+    ],
+]);
+
+// 테넌트 초기화
+$tenant->initialize();
+```
+
+### 테넌트 조회
+
+```php {{ title: '테넌트 조회' }}
+use Orbit\Tenancy\Tenant;
+
+// 모든 테넌트 조회
+$tenants = Tenant::all();
+
+// 특정 테넌트 조회
+$tenant = Tenant::find('site-a');
+$tenant = Tenant::findByDomain('example.com');
+
+// 활성 테넌트 조회
+$activeTenants = Tenant::where('active', true)->get();
+```
+
+### 테넌트 설정
+
+```php {{ title: '테넌트 설정' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 설정 저장
+$tenant->settings()->set([
+    'theme' => 'custom',
+    'locale' => 'en',
+]);
+
+// 설정 조회
+$theme = $tenant->settings()->get('theme');
+$locale = $tenant->settings()->get('locale');
+
+// 설정 삭제
+$tenant->settings()->forget('theme');
+```
+
+## 데이터베이스 API
+
+### 데이터베이스 연결
+
+```php {{ title: '데이터베이스 연결' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 데이터베이스 연결 설정
+$tenant->database()->setConnection([
+    'driver' => 'mysql',
+    'host' => 'localhost',
+    'database' => 'tenant_' . $tenant->id,
+    'username' => 'root',
+    'password' => '',
+]);
+
+// 데이터베이스 연결 테스트
+$connected = $tenant->database()->testConnection();
+
+// 데이터베이스 백업
+$backup = $tenant->database()->backup();
+
+// 데이터베이스 복원
+$tenant->database()->restore($backup);
+```
+
+### 데이터베이스 마이그레이션
+
+```php {{ title: '데이터베이스 마이그레이션' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 마이그레이션 실행
+$tenant->run(function () {
+    Artisan::call('migrate');
+});
+
+// 마이그레이션 롤백
+$tenant->run(function () {
+    Artisan::call('migrate:rollback');
+});
+
+// 시드 실행
+$tenant->run(function () {
+    Artisan::call('db:seed');
+});
+```
+
+## 파일 시스템 API
+
+### 파일 시스템 설정
+
+```php {{ title: '파일 시스템 설정' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 파일 시스템 설정
+$tenant->filesystem()->setConfig([
+    'disk' => 'local',
+    'root' => 'tenants/' . $tenant->id,
+]);
+
+// 파일 저장
+$tenant->filesystem()->put(
+    'images/example.jpg',
+    file_get_contents('example.jpg')
+);
+
+// 파일 조회
+$file = $tenant->filesystem()->get('images/example.jpg');
+
+// 파일 삭제
+$tenant->filesystem()->delete('images/example.jpg');
+```
+
+### 파일 시스템 동기화
+
+```php {{ title: '파일 시스템 동기화' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 파일 동기화
+$tenant->filesystem()->sync([
+    'source' => 'local',
+    'target' => 's3',
+]);
+
+// 파일 충돌 확인
+$conflicts = $tenant->filesystem()->checkConflicts();
+
+// 파일 충돌 해결
+$tenant->filesystem()->resolveConflicts($conflicts);
+```
+
+### API 응답 예제
+
+```json {{ title: 'API 응답 예제' }}
+// 테넌트 생성 응답
+{
+    "id": "site-a",
+    "name": "사이트 A",
+    "domain": "example.com",
+    "settings": {
+        "theme": "default",
+        "locale": "ko"
+    },
+    "created_at": "2024-03-20T10:00:00Z",
+    "updated_at": "2024-03-20T10:00:00Z"
+}
+
+// 데이터베이스 백업 응답
+{
+    "id": "backup-123",
+    "tenant_id": "site-a",
+    "type": "database",
+    "size": 1024000,
+    "created_at": "2024-03-20T10:00:00Z"
+}
+
+// 파일 시스템 동기화 응답
+{
+    "id": "sync-123",
+    "tenant_id": "site-a",
+    "status": "completed",
+    "files_synced": 100,
+    "created_at": "2024-03-20T10:00:00Z"
+}
+```
+
+### API 오류 코드
+
+```json {{ title: 'API 오류 코드' }}
+// 400 Bad Request
+{
+    "error": {
+        "code": "INVALID_REQUEST",
+        "message": "잘못된 요청입니다."
+    }
+}
+
+// 401 Unauthorized
+{
+    "error": {
+        "code": "UNAUTHORIZED",
+        "message": "인증이 필요합니다."
+    }
+}
+
+// 403 Forbidden
+{
+    "error": {
+        "code": "FORBIDDEN",
+        "message": "접근이 거부되었습니다."
+    }
+}
+
+// 404 Not Found
+{
+    "error": {
+        "code": "NOT_FOUND",
+        "message": "리소스를 찾을 수 없습니다."
+    }
+}
+
+// 500 Internal Server Error
+{
+    "error": {
+        "code": "SERVER_ERROR",
+        "message": "서버 오류가 발생했습니다."
+    }
+}
+```
+
+<div className="not-prose">
+  <Button href="/multi-site/changelog" variant="text" arrow="right">
+    <>변경 로그 알아보기</>
+  </Button>
+</div> 

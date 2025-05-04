@@ -1,0 +1,160 @@
+export const metadata = {
+  title: 'CMS-Orbit 설치',
+  description: 'CMS-Orbit의 설치 방법과 초기 설정에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: '설치 방법', id: 'installation-methods' },
+  { title: '환경 설정', id: 'environment-setup' },
+  { title: '초기 설정', id: 'initial-setup' },
+]
+
+# CMS-Orbit 설치
+
+CMS-Orbit을 설치하고 설정하는 방법을 단계별로 알아봅니다. {{ className: 'lead' }}
+
+## 설치 방법
+
+### Composer를 통한 설치
+
+가장 권장되는 설치 방법입니다:
+
+```bash {{ title: 'Composer를 통한 설치' }}
+composer create-project orbit/cms-orbit my-project
+cd my-project
+```
+
+### 수동 설치
+
+1. Git 저장소 클론:
+```bash {{ title: 'Git 저장소 클론' }}
+git clone https://github.com/orbit/cms-orbit.git my-project
+cd my-project
+```
+
+2. 의존성 설치:
+```bash {{ title: '의존성 설치' }}
+composer install
+npm install
+```
+
+### 개발 환경 설정
+
+1. 개발 서버 실행:
+```bash {{ title: '개발 서버 실행' }}
+php artisan serve
+npm run dev
+```
+
+2. 테스트 실행:
+```bash {{ title: '테스트 실행' }}
+php artisan test
+```
+
+## 환경 설정
+
+### .env 파일 설정
+
+`.env` 파일을 생성하고 필요한 설정을 추가합니다:
+
+```txt {{ title: '.env 파일 설정' }}
+APP_NAME=CMS-Orbit
+APP_ENV=local
+APP_KEY=base64:your-key-here
+APP_DEBUG=true
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=cms_orbit
+DB_USERNAME=root
+DB_PASSWORD=
+
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+QUEUE_CONNECTION=sync
+
+MAIL_MAILER=smtp
+MAIL_HOST=mailhog
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+### 데이터베이스 설정
+
+1. 데이터베이스 생성:
+```sql {{ title: 'MySQL 데이터베이스 생성' }}
+CREATE DATABASE cms_orbit CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+2. 마이그레이션 실행:
+```bash {{ title: '마이그레이션 실행' }}
+php artisan migrate
+```
+
+### 캐시 설정
+
+1. 캐시 드라이버 설정:
+```bash {{ title: '캐시 설정' }}
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### 세션 설정
+
+1. 세션 드라이버 설정:
+```bash {{ title: '세션 설정' }}
+php artisan session:table
+php artisan migrate
+```
+
+## 초기 설정
+
+### 관리자 계정 생성
+
+1. 관리자 계정 생성:
+```bash {{ title: '관리자 계정 생성' }}
+php artisan cms:admin
+```
+
+2. 필요한 정보 입력:
+- 이메일
+- 비밀번호
+- 이름
+
+### 기본 설정 구성
+
+1. 사이트 설정:
+```bash {{ title: '사이트 설정' }}
+php artisan cms:site-config
+```
+
+2. 설정 항목:
+- 사이트 이름
+- 기본 언어
+- 시간대
+- 통화
+
+### 테마 설정
+
+1. 기본 테마 설치:
+```bash {{ title: '기본 테마 설치' }}
+php artisan cms:theme-install default
+```
+
+2. 테마 활성화:
+```bash {{ title: '테마 활성화' }}
+php artisan cms:theme-activate default
+```
+
+<div className="not-prose">
+  <Button href="/quickstart" variant="text" arrow="right">
+    <>빠른 시작 가이드 보기</>
+  </Button>
+</div> 

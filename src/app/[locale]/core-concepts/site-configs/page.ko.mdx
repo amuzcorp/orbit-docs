@@ -1,0 +1,139 @@
+export const metadata = {
+  title: '사이트 설정 (SiteConfigs)',
+  description:
+    'SiteConfigs는 CMS-Orbit에서 사이트 전반의 설정을 관리하기 위한 강력한 헬퍼 클래스입니다. 설정 그룹, 캐싱, 유효성 검사, 테넌트별 설정 등 다양한 기능을 제공합니다.',
+}
+
+export const sections = [
+  { title: '기본 사용법', id: 'basic-usage' },
+  { title: '설정 그룹', id: 'config-groups' },
+  { title: '캐싱', id: 'caching' },
+  { title: '기본값 설정', id: 'default-values' },
+  { title: '설정 유효성 검사', id: 'config-validation' },
+  { title: '설정 이벤트', id: 'config-events' },
+  { title: '테넌트별 설정', id: 'tenant-configs' },
+  { title: '설정 마이그레이션', id: 'config-migration' },
+  { title: '설정 시딩', id: 'config-seeding' },
+]
+
+# 사이트 설정 (SiteConfigs)
+
+SiteConfigs는 CMS-Orbit에서 사이트 전반의 설정을 관리하기 위한 강력한 헬퍼 클래스입니다. 설정 그룹, 캐싱, 유효성 검사, 테넌트별 설정 등 다양한 기능을 제공합니다. {{ className: 'lead' }}
+
+## 기본 사용법
+
+SiteConfigs의 기본적인 사용법은 다음과 같습니다:
+
+```php {{ title: '기본 사용법 예제' }}
+use App\Helpers\SiteConfigs;
+
+// 설정 가져오기
+$siteName = SiteConfigs::get('site.name');
+$siteDescription = SiteConfigs::get('site.description');
+
+// 설정 저장하기
+SiteConfigs::set('site.name', 'My Site');
+SiteConfigs::set('site.description', 'Welcome to my site');
+
+// 설정 삭제하기
+SiteConfigs::forget('site.name');
+```
+
+## 설정 그룹
+
+설정을 그룹화하여 관리할 수 있습니다:
+
+```php {{ title: '설정 그룹 예제' }}
+// 설정 그룹 가져오기
+$siteConfig = SiteConfigs::group('site');
+$siteName = $siteConfig->get('name');
+
+// 설정 그룹 저장하기
+$siteConfig->set([
+    'name' => 'My Site',
+    'description' => 'Welcome to my site',
+    'keywords' => 'cms, orbit, laravel',
+]);
+```
+
+## 캐싱
+
+설정은 자동으로 캐싱되어 성능을 최적화합니다:
+
+```php {{ title: '캐싱 예제' }}
+// 캐시 초기화
+SiteConfigs::clearCache();
+
+// 특정 그룹의 캐시만 초기화
+SiteConfigs::clearCache('site');
+```
+
+## 기본값 설정
+
+설정이 없는 경우 기본값을 지정할 수 있습니다:
+
+```php {{ title: '기본값 설정 예제' }}
+$siteName = SiteConfigs::get('site.name', 'Default Site Name');
+```
+
+## 설정 유효성 검사
+
+설정을 저장하기 전에 유효성을 검사할 수 있습니다:
+
+```php {{ title: '설정 유효성 검사 예제' }}
+SiteConfigs::validate('site.name', 'required|string|max:255');
+```
+
+## 설정 이벤트
+
+설정 변경 시 이벤트를 발생시킬 수 있습니다:
+
+```php {{ title: '설정 이벤트 예제' }}
+use App\Events\SiteConfigUpdated;
+
+Event::listen('site.config.updated', function ($key, $value) {
+    // 설정이 업데이트될 때 실행할 작업
+});
+```
+
+## 테넌트별 설정
+
+테넌트별로 다른 설정을 관리할 수 있습니다:
+
+```php {{ title: '테넌트별 설정 예제' }}
+// 현재 테넌트의 설정 가져오기
+$siteName = SiteConfigs::forTenant()->get('site.name');
+
+// 특정 테넌트의 설정 가져오기
+$siteName = SiteConfigs::forTenant($tenantId)->get('site.name');
+```
+
+## 설정 마이그레이션
+
+설정을 데이터베이스에 마이그레이션할 수 있습니다:
+
+```bash {{ title: '설정 마이그레이션 예제' }}
+# 설정 마이그레이션 파일 생성
+php artisan make:config-migration CreateSiteConfigs
+
+# 마이그레이션 실행
+php artisan migrate
+```
+
+## 설정 시딩
+
+기본 설정을 시딩할 수 있습니다:
+
+```bash {{ title: '설정 시딩 예제' }}
+# 설정 시더 생성
+php artisan make:config-seeder SiteConfigsSeeder
+
+# 시더 실행
+php artisan db:seed --class=SiteConfigsSeeder
+```
+
+<div className="not-prose">
+  <Button href="/core-concepts/models" variant="text" arrow="right">
+    <>모델 개념 알아보기</>
+  </Button>
+</div> 

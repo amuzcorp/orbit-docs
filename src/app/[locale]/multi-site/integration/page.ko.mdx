@@ -1,0 +1,289 @@
+export const metadata = {
+  title: '사이트 통합',
+  description: 'CMS-Orbit의 사이트 통합 기능에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: 'API 통합', id: 'api-integration' },
+  { title: '데이터 통합', id: 'data-integration' },
+  { title: '서비스 통합', id: 'service-integration' },
+]
+
+# 사이트 통합
+
+CMS-Orbit의 통합 기능을 통해 각 사이트를 외부 시스템과 연동하고 데이터를 공유할 수 있습니다. {{ className: 'lead' }}
+
+## API 통합
+
+### API 설정
+
+```php {{ title: 'API 설정' }}
+// config/tenancy.php
+return [
+    'api' => [
+        'enabled' => true,
+        'version' => 'v1',
+        'prefix' => 'api',
+        'middleware' => [
+            'api',
+            'tenant',
+        ],
+        'rate_limit' => [
+            'enabled' => true,
+            'max_attempts' => 60,
+            'decay_minutes' => 1,
+        ],
+    ],
+];
+```
+
+### API 인증
+
+```php {{ title: 'API 인증' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// API 키 생성
+$apiKey = $tenant->apiKeys()->create([
+    'name' => 'Integration API',
+    'key' => Str::random(32),
+    'secret' => Str::random(64),
+    'permissions' => [
+        'read',
+        'write',
+    ],
+]);
+
+// API 미들웨어
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Orbit\Tenancy\Tenant;
+
+class ApiAuthentication
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $apiKey = $request->header('X-API-Key');
+        $apiSecret = $request->header('X-API-Secret');
+
+        $tenant = Tenant::current();
+        $key = $tenant->apiKeys()
+            ->where('key', $apiKey)
+            ->where('secret', $apiSecret)
+            ->first();
+
+        if (!$key) {
+            return response()->json([
+                'error' => 'Invalid API credentials',
+            ], 401);
+        }
+
+        return $next($request);
+    }
+}
+```
+
+### API 엔드포인트
+
+```php {{ title: 'API 엔드포인트' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// API 라우트
+Route::prefix('api/v1')
+    ->middleware(['api', 'tenant', 'auth:api'])
+    ->group(function () {
+        // 사용자 API
+        Route::get('users', function () {
+            return User::all();
+        });
+
+        // 게시물 API
+        Route::get('posts', function () {
+            return Post::all();
+        });
+
+        // 설정 API
+        Route::get('settings', function () {
+            return Setting::all();
+        });
+    });
+```
+
+## 데이터 통합
+
+### 데이터 동기화
+
+```php {{ title: '데이터 동기화' }}
+use Orbit\Tenancy\Tenant;
+
+$sourceTenant = Tenant::find('site-a');
+$targetTenant = Tenant::find('site-b');
+
+// 데이터 동기화 설정
+$sync = $sourceTenant->syncs()->create([
+    'target_tenant_id' => $targetTenant->id,
+    'tables' => [
+        'users',
+        'posts',
+        'settings',
+    ],
+    'schedule' => 'daily',
+    'last_sync' => now(),
+]);
+
+// 데이터 동기화 실행
+$sync->run();
+```
+
+### 데이터 매핑
+
+```php {{ title: '데이터 매핑' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 데이터 매핑 설정
+$mapping = $tenant->mappings()->create([
+    'source' => [
+        'table' => 'users',
+        'fields' => [
+            'name',
+            'email',
+            'phone',
+        ],
+    ],
+    'target' => [
+        'table' => 'contacts',
+        'fields' => [
+            'full_name',
+            'email_address',
+            'phone_number',
+        ],
+    ],
+    'rules' => [
+        'name' => 'full_name',
+        'email' => 'email_address',
+        'phone' => 'phone_number',
+    ],
+]);
+
+// 데이터 매핑 실행
+$mapping->run();
+```
+
+### 데이터 변환
+
+```php {{ title: '데이터 변환' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 데이터 변환 설정
+$transformer = $tenant->transformers()->create([
+    'source' => 'users',
+    'target' => 'contacts',
+    'rules' => [
+        'name' => function ($value) {
+            return ucwords($value);
+        },
+        'email' => function ($value) {
+            return strtolower($value);
+        },
+        'phone' => function ($value) {
+            return preg_replace('/[^0-9]/', '', $value);
+        },
+    ],
+]);
+
+// 데이터 변환 실행
+$transformer->run();
+```
+
+## 서비스 통합
+
+### 외부 서비스 연동
+
+```php {{ title: '외부 서비스 연동' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 외부 서비스 설정
+$service = $tenant->services()->create([
+    'name' => 'payment',
+    'provider' => 'stripe',
+    'credentials' => [
+        'api_key' => 'sk_test_...',
+        'webhook_secret' => 'whsec_...',
+    ],
+    'settings' => [
+        'currency' => 'USD',
+        'test_mode' => true,
+    ],
+]);
+
+// 서비스 사용
+$payment = $service->client()->charges->create([
+    'amount' => 1000,
+    'currency' => 'usd',
+    'source' => 'tok_visa',
+]);
+```
+
+### 웹훅 설정
+
+```php {{ title: '웹훅 설정' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 웹훅 생성
+$webhook = $tenant->webhooks()->create([
+    'name' => 'Payment Webhook',
+    'url' => 'https://example.com/webhook/payment',
+    'events' => [
+        'payment.succeeded',
+        'payment.failed',
+    ],
+    'secret' => Str::random(32),
+]);
+
+// 웹훅 처리
+Route::post('webhook/payment', function (Request $request) {
+    $tenant = Tenant::current();
+    $webhook = $tenant->webhooks()
+        ->where('secret', $request->header('X-Webhook-Secret'))
+        ->first();
+
+    if (!$webhook) {
+        abort(401);
+    }
+
+    $event = $request->all();
+    $webhook->handle($event);
+});
+```
+
+### 통합 명령어
+
+```bash {{ title: '통합 명령어' }}
+# API 키 생성
+php artisan tenancy:api-key site-a
+
+# 데이터 동기화
+php artisan tenancy:sync site-a site-b
+
+# 서비스 연동
+php artisan tenancy:service site-a stripe
+```
+
+<div className="not-prose">
+  <Button href="/multi-site/maintenance" variant="text" arrow="right">
+    <>사이트 유지보수 알아보기</>
+  </Button>
+</div> 

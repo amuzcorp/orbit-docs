@@ -1,0 +1,236 @@
+export const metadata = {
+  title: '사이트 백업',
+  description: 'CMS-Orbit의 사이트 백업 기능에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: '데이터베이스 백업', id: 'database-backup' },
+  { title: '파일 백업', id: 'file-backup' },
+  { title: '설정 백업', id: 'setting-backup' },
+]
+
+# 사이트 백업
+
+CMS-Orbit에서 사이트의 데이터, 파일, 설정을 백업하고 복원하는 방법을 알아봅니다. {{ className: 'lead' }}
+
+## 데이터베이스 백업
+
+### 데이터베이스 백업 생성
+
+```php {{ title: '데이터베이스 백업 생성' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 데이터베이스 백업
+$backup = $tenant->database()->backup();
+
+// 백업 파일 저장
+$filename = 'backups/site-a/' . date('Y-m-d_H-i-s') . '.sql';
+Storage::put($filename, $backup);
+```
+
+### 데이터베이스 백업 복원
+
+```php {{ title: '데이터베이스 백업 복원' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 백업 파일 복원
+$backup = Storage::get('backups/site-a/2024-03-20_10-30-00.sql');
+$tenant->database()->restore($backup);
+```
+
+### 자동 백업 설정
+
+```php {{ title: '자동 백업 설정' }}
+// config/tenancy.php
+return [
+    'backup' => [
+        'database' => [
+            'enabled' => true,
+            'schedule' => 'daily',
+            'retention' => 7, // 일
+            'path' => 'backups/database',
+        ],
+    ],
+];
+```
+
+### 백업 명령어
+
+```bash {{ title: '백업 명령어' }}
+# 특정 사이트 백업
+php artisan tenancy:backup site-a
+
+# 모든 사이트 백업
+php artisan tenancy:backup --all
+
+# 백업 복원
+php artisan tenancy:restore site-a 2024-03-20_10-30-00.sql
+```
+
+## 파일 백업
+
+### 파일 백업 생성
+
+```php {{ title: '파일 백업 생성' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 파일 시스템 백업
+$files = $tenant->filesystem()->allFiles();
+
+foreach ($files as $file) {
+    $content = $tenant->filesystem()->get($file);
+    Storage::put("backups/site-a/files/{$file}", $content);
+}
+```
+
+### 파일 백업 복원
+
+```php {{ title: '파일 백업 복원' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 백업 파일 복원
+$files = Storage::files('backups/site-a/files');
+
+foreach ($files as $file) {
+    $content = Storage::get($file);
+    $tenant->filesystem()->put(
+        str_replace('backups/site-a/files/', '', $file),
+        $content
+    );
+}
+```
+
+### 자동 파일 백업 설정
+
+```php {{ title: '자동 파일 백업 설정' }}
+// config/tenancy.php
+return [
+    'backup' => [
+        'files' => [
+            'enabled' => true,
+            'schedule' => 'weekly',
+            'retention' => 30, // 일
+            'path' => 'backups/files',
+            'exclude' => [
+                'tmp',
+                'cache',
+                'logs',
+            ],
+        ],
+    ],
+];
+```
+
+## 설정 백업
+
+### 설정 백업 생성
+
+```php {{ title: '설정 백업 생성' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 설정 백업
+$settings = $tenant->settings()->all();
+$filename = 'backups/site-a/settings/' . date('Y-m-d_H-i-s') . '.json';
+Storage::put($filename, json_encode($settings));
+```
+
+### 설정 백업 복원
+
+```php {{ title: '설정 백업 복원' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 백업 설정 복원
+$settings = json_decode(
+    Storage::get('backups/site-a/settings/2024-03-20_10-30-00.json'),
+    true
+);
+$tenant->settings()->set($settings);
+```
+
+### 자동 설정 백업 설정
+
+```php {{ title: '자동 설정 백업 설정' }}
+// config/tenancy.php
+return [
+    'backup' => [
+        'settings' => [
+            'enabled' => true,
+            'schedule' => 'daily',
+            'retention' => 7, // 일
+            'path' => 'backups/settings',
+        ],
+    ],
+];
+```
+
+### 전체 백업
+
+```php {{ title: '전체 백업' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+$timestamp = date('Y-m-d_H-i-s');
+
+// 데이터베이스 백업
+$backup = $tenant->database()->backup();
+Storage::put("backups/site-a/{$timestamp}/database.sql", $backup);
+
+// 파일 백업
+$files = $tenant->filesystem()->allFiles();
+foreach ($files as $file) {
+    $content = $tenant->filesystem()->get($file);
+    Storage::put("backups/site-a/{$timestamp}/files/{$file}", $content);
+}
+
+// 설정 백업
+$settings = $tenant->settings()->all();
+Storage::put(
+    "backups/site-a/{$timestamp}/settings.json",
+    json_encode($settings)
+);
+```
+
+### 백업 관리
+
+```php {{ title: '백업 관리' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 백업 목록 조회
+$backups = Storage::directories('backups/site-a');
+
+// 오래된 백업 삭제
+$retention = 7; // 일
+foreach ($backups as $backup) {
+    $date = strtotime(basename($backup));
+    if (time() - $date > $retention * 24 * 60 * 60) {
+        Storage::deleteDirectory($backup);
+    }
+}
+
+// 백업 상태 확인
+$status = [
+    'database' => Storage::exists('backups/site-a/database.sql'),
+    'files' => Storage::exists('backups/site-a/files'),
+    'settings' => Storage::exists('backups/site-a/settings.json'),
+];
+```
+
+<div className="not-prose">
+  <Button href="/multi-site/security" variant="text" arrow="right">
+    <>사이트 보안 알아보기</>
+  </Button>
+</div> 

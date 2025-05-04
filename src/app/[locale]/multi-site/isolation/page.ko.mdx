@@ -1,0 +1,196 @@
+export const metadata = {
+  title: '사이트 격리',
+  description: 'CMS-Orbit의 사이트 격리 기능에 대해 알아봅니다.',
+}
+
+export const sections = [
+  { title: '데이터베이스 격리', id: 'database-isolation' },
+  { title: '파일 시스템 격리', id: 'filesystem-isolation' },
+  { title: '세션 격리', id: 'session-isolation' },
+]
+
+# 사이트 격리
+
+CMS-Orbit의 사이트 격리 기능을 통해 각 사이트의 데이터와 리소스를 독립적으로 관리할 수 있습니다. {{ className: 'lead' }}
+
+## 데이터베이스 격리
+
+### 데이터베이스 구조
+
+```php {{ title: '데이터베이스 구조' }}
+// config/tenancy.php
+return [
+    'database' => [
+        'based_on' => 'domain',
+        'prefix' => 'tenant_',
+        'suffix' => '',
+        'separate_by' => 'database',
+    ],
+];
+```
+
+### 데이터베이스 연결
+
+```php {{ title: '데이터베이스 연결' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사이트 A의 데이터베이스 연결
+$tenant->run(function () {
+    $posts = Post::all();
+    $users = User::all();
+});
+
+// 사이트 B의 데이터베이스 연결
+$tenant = Tenant::find('site-b');
+$tenant->run(function () {
+    $posts = Post::all();
+    $users = User::all();
+});
+```
+
+### 데이터베이스 마이그레이션
+
+```php {{ title: '데이터베이스 마이그레이션' }}
+use Orbit\Tenancy\Tenant;
+
+// 모든 사이트에 마이그레이션 적용
+Tenant::all()->each(function ($tenant) {
+    $tenant->run(function () {
+        Artisan::call('migrate');
+    });
+});
+
+// 특정 사이트에 마이그레이션 적용
+$tenant = Tenant::find('site-a');
+$tenant->run(function () {
+    Artisan::call('migrate');
+});
+```
+
+## 파일 시스템 격리
+
+### 파일 시스템 구조
+
+```php {{ title: '파일 시스템 구조' }}
+// config/tenancy.php
+return [
+    'filesystem' => [
+        'disk' => 'local',
+        'root_override' => [
+            'local' => '%storage_path%/app/tenants/%tenant_id%',
+            'public' => '%storage_path%/app/public/tenants/%tenant_id%',
+        ],
+    ],
+];
+```
+
+### 파일 저장
+
+```php {{ title: '파일 저장' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사이트 A에 파일 저장
+$tenant->run(function () {
+    $file = $request->file('image');
+    $path = $file->store('images', 'public');
+});
+
+// 사이트 B에 파일 저장
+$tenant = Tenant::find('site-b');
+$tenant->run(function () {
+    $file = $request->file('image');
+    $path = $file->store('images', 'public');
+});
+```
+
+### 파일 접근
+
+```php {{ title: '파일 접근' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사이트 A의 파일 접근
+$tenant->run(function () {
+    $url = Storage::url('images/example.jpg');
+    $path = Storage::path('images/example.jpg');
+});
+
+// 사이트 B의 파일 접근
+$tenant = Tenant::find('site-b');
+$tenant->run(function () {
+    $url = Storage::url('images/example.jpg');
+    $path = Storage::path('images/example.jpg');
+});
+```
+
+## 세션 격리
+
+### 세션 설정
+
+```php {{ title: '세션 설정' }}
+// config/tenancy.php
+return [
+    'session' => [
+        'based_on' => 'domain',
+        'prefix' => 'tenant_',
+        'suffix' => '',
+    ],
+];
+```
+
+### 세션 관리
+
+```php {{ title: '세션 관리' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사이트 A의 세션
+$tenant->run(function () {
+    session(['user_id' => 1]);
+    $userId = session('user_id');
+});
+
+// 사이트 B의 세션
+$tenant = Tenant::find('site-b');
+$tenant->run(function () {
+    session(['user_id' => 2]);
+    $userId = session('user_id');
+});
+```
+
+### 세션 미들웨어
+
+```php {{ title: '세션 미들웨어' }}
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Orbit\Tenancy\Tenant;
+
+class InitializeTenancySession
+{
+    public function handle(Request $request, Closure $next)
+    {
+        $tenant = Tenant::current();
+        
+        if ($tenant) {
+            // 세션 키 설정
+            config(['session.cookie' => 'tenant_' . $tenant->id]);
+        }
+
+        return $next($request);
+    }
+}
+```
+
+<div className="not-prose">
+  <Button href="/multi-site/sharing" variant="text" arrow="right">
+    <>리소스 공유 알아보기</>
+  </Button>
+</div> 

@@ -19,12 +19,15 @@ function useInitialValue(value, condition = true) {
 
 function TopLevelNavItem({ href, children }) {
   const { locale } = useParams()
+
+  const isExternalLink = href.startsWith('http')
   const localizedHref = href === '/' ? `/${locale}` : `/${locale}${href}`
 
   return (
     <li className="md:hidden">
       <Link
-        href={localizedHref}
+        href={isExternalLink ? href : localizedHref}
+        target={isExternalLink ? '_blank' : undefined}
         className="block py-1 text-sm text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
       >
         {children}
@@ -41,7 +44,7 @@ function NavLink({
   isAnchorLink = false,
 }) {
   const { locale } = useParams()
-  const localizedHref = isAnchorLink ? href : `/${locale}${href}`
+  const localizedHref = isAnchorLink ? `/${locale}${href}` : `/${locale}${href}`
 
   return (
     <Link
@@ -187,13 +190,17 @@ function NavigationGroup({ group, className }) {
                   >
                     {sections.map((section) => (
                       <li key={section.id}>
-                        <NavLink
-                          href={`${link.href}#${section.id}`}
-                          tag={section.tag}
-                          isAnchorLink
+                        <a
+                          href={`/${locale}${link.href}#${section.id}`}
+                          className="flex justify-between gap-2 py-1 pl-7 pr-3 text-sm transition text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                         >
-                          {section.title}
-                        </NavLink>
+                          <span className="truncate">{section.title}</span>
+                          {section.tag && (
+                            <Tag variant="small" color="zinc">
+                              {section.tag}
+                            </Tag>
+                          )}
+                        </a>
                       </li>
                     ))}
                   </motion.ul>
@@ -209,10 +216,94 @@ function NavigationGroup({ group, className }) {
 
 export const navigation = [
   {
-    title: 'Prologue',
+    title: '시작하기',
     links: [
-      { title: 'Introduction', href: '/' },
-      { title: 'Quickstart', href: '/quickstart' },
+      { title: '소개', href: '/introduction' },
+      { title: '설치', href: '/installation' },
+      { title: '빠른 시작', href: '/quick-start' },
+    ],
+  },
+  {
+    title: '데이터 유형',
+    links: [
+      { title: '기본 관계', href: '/data-types/relationships' },
+      { title: '모델', href: '/data-types/models' },
+      { title: '엔티티', href: '/data-types/entities' },
+      { title: '문서', href: '/data-types/documents' },
+    ],
+  },
+  {
+    title: '멀티사이트',
+    links: [
+      { title: '개요', href: '/multi-site' },
+      { title: '사이트 생성', href: '/multi-site/site-creation' },
+      { title: '사이트 관리', href: '/multi-site/site-management' },
+      { title: '사이트 설정', href: '/multi-site/site-settings' },
+      { title: '사이트 스케일링', href: '/multi-site/scaling' },
+      { title: '사이트 통합', href: '/multi-site/integration' },
+    ],
+  },
+  {
+    title: '관리자 패널',
+    links: [
+      { title: 'Orchid 플랫폼', href: '/admin-panel/orchid' },
+      { title: '리소스 관리', href: '/admin-panel/resources' },
+      { title: '사용자 관리', href: '/admin-panel/users' },
+    ],
+  },
+  {
+    title: '테마',
+    links: [
+      { title: '테마 구조', href: '/theme/structure' },
+      { title: '테마 커스터마이징', href: '/theme/customization' },
+      { title: '테마 배포', href: '/theme/deployment' },
+    ],
+  },
+  {
+    title: '다국어 지원',
+    links: [
+      { title: '언어 설정', href: '/localization/language' },
+      { title: '번역 관리', href: '/localization/translation' },
+    ],
+  },
+  {
+    title: 'API 개발',
+    links: [
+      { title: 'API 기본', href: '/api/basics' },
+      { title: 'API 엔드포인트', href: '/api/endpoints' },
+      { title: 'API 보안', href: '/api/security' },
+    ],
+  },
+  {
+    title: '사이트 설정',
+    links: [
+      { title: '설정 기본', href: '/site-configs/basics' },
+      { title: '사이트설정 사용', href: '/site-configs/usage' },
+      { title: '기본 사이트설정 그룹', href: '/site-configs/groups' },
+    ],
+  },
+  {
+    title: '고급 기능',
+    links: [
+      { title: '이벤트 시스템', href: '/advanced/events' },
+      { title: '캐싱', href: '/advanced/caching' },
+      { title: '큐 시스템', href: '/advanced/queue' },
+    ],
+  },
+  {
+    title: '배포 및 유지보수',
+    links: [
+      { title: '배포', href: '/deployment/main' },
+      { title: '모니터링', href: '/deployment/monitoring' },
+      { title: '백업 및 복구', href: '/deployment/backup' },
+    ],
+  },
+  {
+    title: '문제 해결',
+    links: [
+      { title: '일반적인 문제', href: '/troubleshooting/common' },
+      { title: '오류 코드', href: '/troubleshooting/errors' },
+      { title: 'FAQ', href: '/troubleshooting/faq' },
     ],
   },
 ]
@@ -224,6 +315,7 @@ export function Navigation(props) {
     <nav {...props}>
       <ul role="list">
         <TopLevelNavItem href="/">Documentation</TopLevelNavItem>
+        <TopLevelNavItem href="https://amuz.co.kr" target={'_blank'}>AmuzOfficial</TopLevelNavItem>
         {navigation.map((group, groupIndex) => (
           <NavigationGroup
             key={group.title}
