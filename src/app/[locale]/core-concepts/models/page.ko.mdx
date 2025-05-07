@@ -11,9 +11,41 @@ export const sections = [
   { title: '모델과 리소스의 관계', id: 'model-resource-relationship' },
 ]
 
-# 모델 (Models)
+# 모델
 
-모델은 CMS-Orbit에서 데이터 구조를 정의하는 기본 단위입니다. Orchid의 강력한 기능을 활용하여 데이터를 효율적으로 관리할 수 있습니다. {{ className: 'lead' }}
+모델은 데이터의 구조와 동작을 정의합니다. 애플리케이션의 데이터 계층의 기반이 됩니다.
+
+## 주요 개념
+
+- **스키마 정의**: 데이터 구조 정의
+- **유효성 검사 규칙**: 데이터 무결성 보장
+- **관계**: 모델 간의 연결 정의
+- **메서드**: 모델에 사용자 정의 동작 추가
+
+## 예시
+
+```typescript
+// 모델 정의 예시
+interface UserModel {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'user';
+  createdAt: Date;
+  updatedAt: Date;
+  
+  // 메서드
+  isAdmin(): boolean;
+  updateProfile(data: Partial<UserModel>): Promise<void>;
+}
+```
+
+## 모범 사례
+
+1. 모델을 집중적이고 단일 목적으로 유지
+2. 적절한 유효성 검사 사용
+3. 명확한 관계 정의
+4. 적절한 오류 처리 구현
 
 ## 모델 생성하기
 

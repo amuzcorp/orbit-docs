@@ -9,7 +9,70 @@ export const sections = [
   { title: '로드 밸런싱', id: 'load-balancing' },
 ]
 
-# 사이트 스케일링
+# 멀티사이트 스케일링
+
+이 가이드는 증가된 부하와 트래픽을 처리하기 위해 멀티사이트 애플리케이션을 확장하는 방법을 설명합니다.
+
+## 주요 개념
+
+- **수평적 확장**: 증가된 부하를 처리하기 위해 서버 추가
+- **수직적 확장**: 기존 서버의 리소스 증가
+- **로드 밸런싱**: 여러 서버에 트래픽 분산
+- **캐싱**: 캐싱 전략 구현
+
+## 스케일링 전략
+
+1. 데이터베이스 스케일링:
+   ```typescript
+   interface DatabaseConfig {
+     type: 'master' | 'slave';
+     connection: {
+       host: string;
+       port: number;
+       database: string;
+     };
+     replication: {
+       enabled: boolean;
+       strategy: 'master-slave' | 'master-master';
+     };
+   }
+   ```
+
+2. 애플리케이션 스케일링:
+   ```typescript
+   interface AppConfig {
+     workers: number;
+     memory: number;
+     cpu: number;
+     autoScaling: {
+       enabled: boolean;
+       minInstances: number;
+       maxInstances: number;
+     };
+   }
+   ```
+
+3. 캐시 구성:
+   ```typescript
+   interface CacheConfig {
+     driver: 'redis' | 'memcached';
+     connection: {
+       host: string;
+       port: number;
+     };
+     options: {
+       prefix: string;
+       ttl: number;
+     };
+   }
+   ```
+
+## 모범 사례
+
+1. 리소스 사용량 모니터링
+2. 적절한 캐싱 구현
+3. 로드 밸런싱 사용
+4. 정기적인 성능 테스트
 
 CMS-Orbit의 스케일링 기능을 통해 각 사이트의 트래픽과 리소스 사용을 효율적으로 관리할 수 있습니다. {{ className: 'lead' }}
 

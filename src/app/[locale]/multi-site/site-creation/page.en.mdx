@@ -1,0 +1,109 @@
+# Site Creation
+
+This guide explains how to create and configure a new site.
+
+## Prerequisites
+
+- Administrator privileges
+- Valid domain
+- Database access
+- SSL certificate (optional)
+
+## Site Creation Steps
+
+### 1. Basic Information Setup
+
+```php {{ title: 'Basic Information Setup' }}
+use Orbit\Tenancy\Tenant;
+
+// Create new site
+$tenant = Tenant::create([
+    'id' => 'site-a',
+    'name' => 'Site A',
+    'domain' => 'site-a.example.com',
+    'database' => [
+        'connection' => 'tenant',
+        'name' => 'tenant_site_a',
+    ],
+]);
+
+// Initialize site
+$tenant->initialize();
+```
+
+### 2. Database Configuration
+
+```php {{ title: 'Database Configuration' }}
+// config/tenancy.php
+return [
+    'database' => [
+        'tenant' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => null, // Set dynamically
+            'username' => env('DB_USERNAME', 'forge'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+        ],
+    ],
+];
+```
+
+### 3. Site Settings
+
+```php {{ title: 'Site Settings' }}
+// Configure site settings
+$tenant->settings()->set([
+    'app_name' => 'Site A',
+    'timezone' => 'UTC',
+    'locale' => 'en',
+    'mail' => [
+        'from_address' => 'noreply@site-a.example.com',
+        'from_name' => 'Site A',
+    ],
+]);
+```
+
+### 4. User and Permission Setup
+
+```php {{ title: 'User and Permission Setup' }}
+// Create admin user
+$admin = $tenant->users()->create([
+    'name' => 'Admin',
+    'email' => 'admin@site-a.example.com',
+    'password' => Hash::make('password'),
+]);
+
+// Assign admin role
+$tenant->permissions()->assignRole($admin, 'admin');
+```
+
+## Site Creation Commands
+
+```bash {{ title: 'Site Creation Commands' }}
+# Create new site
+php artisan tenancy:create site-a
+
+# Initialize site
+php artisan tenancy:init site-a
+
+# Configure site settings
+php artisan tenancy:settings site-a
+```
+
+## Best Practices
+
+1. Use clear site IDs and domains
+2. Set strong passwords for security
+3. Use appropriate database prefixes
+4. Configure SSL certificates
+5. Set up backups
+
+<div className="not-prose">
+  <Button href="/multi-site/site-management" variant="text" arrow="right">
+    <>Manage Sites</>
+  </Button>
+</div> 

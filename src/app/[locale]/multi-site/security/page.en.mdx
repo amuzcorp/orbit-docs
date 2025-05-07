@@ -1,30 +1,19 @@
-export const metadata = {
-  title: '사이트 보안',
-  description: 'CMS-Orbit의 사이트 보안 기능에 대해 알아봅니다.',
-}
+# Multi-Site Security
 
-export const sections = [
-  { title: '인증 및 권한', id: 'authentication-authorization' },
-  { title: '데이터 보안', id: 'data-security' },
-  { title: '네트워크 보안', id: 'network-security' },
-]
+This guide explains security settings and management for multi-site applications.
 
-# 멀티사이트 보안
+## Key Security Areas
 
-이 가이드는 멀티사이트 애플리케이션의 보안 설정과 관리에 대해 설명합니다.
+- **Authentication**: User authentication and session management
+- **Permissions**: Access control and permission management
+- **Data Security**: Data encryption and protection
+- **Network Security**: SSL/TLS and firewall settings
 
-## 주요 보안 영역
+## Security Configuration
 
-- **인증**: 사용자 인증 및 세션 관리
-- **권한**: 접근 제어 및 권한 관리
-- **데이터 보안**: 데이터 암호화 및 보호
-- **네트워크 보안**: SSL/TLS 및 방화벽 설정
+### Authentication Settings
 
-## 보안 설정
-
-### 인증 설정
-
-```php {{ title: '인증 설정' }}
+```php {{ title: 'Authentication Settings' }}
 // config/tenancy.php
 return [
     'auth' => [
@@ -49,9 +38,9 @@ return [
 ];
 ```
 
-### 권한 설정
+### Permission Settings
 
-```php {{ title: '권한 설정' }}
+```php {{ title: 'Permission Settings' }}
 // config/tenancy.php
 return [
     'permissions' => [
@@ -79,9 +68,9 @@ return [
 ];
 ```
 
-### 데이터 보안
+### Data Security
 
-```php {{ title: '데이터 보안' }}
+```php {{ title: 'Data Security' }}
 // config/tenancy.php
 return [
     'security' => [
@@ -103,9 +92,9 @@ return [
 ];
 ```
 
-### 네트워크 보안
+### Network Security
 
-```php {{ title: '네트워크 보안' }}
+```php {{ title: 'Network Security' }}
 // config/tenancy.php
 return [
     'security' => [
@@ -133,79 +122,79 @@ return [
 ];
 ```
 
-## 보안 기능 구현
+## Security Feature Implementation
 
-### 사용자 인증
+### User Authentication
 
-```php {{ title: '사용자 인증' }}
+```php {{ title: 'User Authentication' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 사용자 인증
+// Authenticate user
 $authenticated = $tenant->auth()->attempt([
     'email' => $email,
     'password' => $password,
 ]);
 
 if ($authenticated) {
-    // 세션 생성
+    // Create session
     $tenant->auth()->login($user);
     
-    // 토큰 생성
+    // Create token
     $token = $tenant->auth()->createToken($user);
 }
 
-// 로그아웃
+// Logout
 $tenant->auth()->logout();
 ```
 
-### 권한 확인
+### Permission Check
 
-```php {{ title: '권한 확인' }}
+```php {{ title: 'Permission Check' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 권한 확인
+// Check permission
 $hasPermission = $tenant->permissions()->check($user, 'manage_users');
 
 if ($hasPermission) {
-    // 권한이 있는 작업 수행
+    // Perform authorized action
 }
 
-// 역할 할당
+// Assign role
 $tenant->permissions()->assignRole($user, 'admin');
 
-// 권한 부여
+// Grant permission
 $tenant->permissions()->grant($user, 'manage_content');
 ```
 
-### 데이터 암호화
+### Data Encryption
 
-```php {{ title: '데이터 암호화' }}
+```php {{ title: 'Data Encryption' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 데이터 암호화
+// Encrypt data
 $encrypted = $tenant->security()->encrypt($data);
 
-// 데이터 복호화
+// Decrypt data
 $decrypted = $tenant->security()->decrypt($encrypted);
 
-// 안전한 해시 생성
+// Create secure hash
 $hashed = $tenant->security()->hash($password);
 ```
 
-### 보안 감사
+### Security Audit
 
-```php {{ title: '보안 감사' }}
+```php {{ title: 'Security Audit' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 보안 로그 기록
+// Log security event
 $tenant->security()->log([
     'event' => 'login_attempt',
     'user_id' => $user->id,
@@ -213,39 +202,39 @@ $tenant->security()->log([
     'user_agent' => request()->userAgent(),
 ]);
 
-// 보안 이벤트 모니터링
+// Monitor security events
 $events = $tenant->security()->getEvents([
     'type' => 'suspicious',
     'since' => now()->subDay(),
 ]);
 ```
 
-## 보안 명령어
+## Security Commands
 
-```bash {{ title: '보안 명령어' }}
-# 보안 설정 확인
+```bash {{ title: 'Security Commands' }}
+# Check security settings
 php artisan tenancy:security-check site-a
 
-# 권한 캐시 재생성
+# Regenerate permission cache
 php artisan tenancy:permission-cache site-a
 
-# 보안 로그 확인
+# Check security logs
 php artisan tenancy:security-logs site-a
 
-# SSL 인증서 갱신
+# Renew SSL certificate
 php artisan tenancy:ssl-renew site-a
 ```
 
-## 모범 사례
+## Best Practices
 
-1. 정기적인 보안 업데이트 적용
-2. 강력한 비밀번호 정책 적용
-3. 최소 권한 원칙 준수
-4. 정기적인 보안 감사 수행
-5. 보안 이벤트 모니터링
+1. Apply regular security updates
+2. Implement strong password policies
+3. Follow the principle of least privilege
+4. Perform regular security audits
+5. Monitor security events
 
 <div className="not-prose">
   <Button href="/multi-site/troubleshooting" variant="text" arrow="right">
-    <>문제 해결 알아보기</>
+    <>Learn about Troubleshooting</>
   </Button>
 </div> 

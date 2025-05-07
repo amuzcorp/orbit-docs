@@ -463,4 +463,67 @@ class PostResource extends Resource
   <Button href="/data-types/entities" variant="text" arrow="right">
     <>엔티티 알아보기</>
   </Button>
-</div> 
+</div>
+
+# 모델 데이터 타입
+
+모델 데이터 타입은 데이터베이스 모델의 구조와 동작을 정의합니다. 데이터베이스 작업의 데이터 일관성을 보장하고 타입 안전성을 제공합니다.
+
+## 주요 기능
+
+- **타입 정의**: 모델의 구조 정의
+- **유효성 검사 규칙**: 데이터 무결성 보장
+- **데이터베이스 스키마**: 데이터베이스 테이블 구조 정의
+- **사용자 정의 타입**: 사용자 정의 모델 타입 생성
+
+## 예시
+
+```typescript
+// 모델 타입 정의 예시
+interface ModelType {
+  id: string;
+  name: string;
+  table: string;
+  columns: {
+    id: {
+      type: 'bigIncrements';
+      primary: true;
+    };
+    name: {
+      type: 'string';
+      length: 100;
+      nullable: false;
+    };
+    description: {
+      type: 'text';
+      nullable: true;
+    };
+    status: {
+      type: 'enum';
+      values: ['active', 'inactive', 'pending'];
+      default: 'pending';
+    };
+    created_at: {
+      type: 'timestamp';
+      nullable: false;
+    };
+    updated_at: {
+      type: 'timestamp';
+      nullable: false;
+    };
+  };
+  indexes: {
+    name_index: {
+      columns: ['name'];
+      unique: true;
+    };
+  };
+}
+```
+
+## 모범 사례
+
+1. 의미 있는 타입 이름 사용
+2. 적절한 유효성 검사 구현
+3. 적절한 인덱스 정의
+4. 타입 정의 문서화 

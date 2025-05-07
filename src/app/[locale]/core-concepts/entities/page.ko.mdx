@@ -11,9 +11,42 @@ export const sections = [
   { title: '엔티티의 사용 사례', id: 'entity-use-cases' },
 ]
 
-# 엔티티 (Entities)
+# 엔티티
 
-엔티티는 CMS-Orbit에서 재사용 가능한 데이터 구조를 정의하는 방법입니다. 모델과 달리 데이터베이스 테이블을 생성하지 않고, 코드에서만 존재하는 데이터 구조를 정의할 수 있습니다. {{ className: 'lead' }}
+엔티티는 애플리케이션의 핵심 비즈니스 객체입니다. 애플리케이션이 다루는 주요 개념과 데이터 구조를 나타냅니다.
+
+## 주요 기능
+
+- **식별자**: 각 엔티티는 고유한 식별자를 가짐
+- **속성**: 엔티티의 특성을 정의
+- **동작**: 다른 엔티티와의 상호작용 정의
+- **생명주기**: 엔티티의 상태 관리
+
+## 예시
+
+```typescript
+// 엔티티 정의 예시
+interface ProductEntity {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  
+  // 메서드
+  updateStock(quantity: number): void;
+  isInStock(): boolean;
+  calculateDiscount(percentage: number): number;
+}
+```
+
+## 모범 사례
+
+1. 엔티티를 비즈니스 로직에 집중
+2. 적절한 유효성 검사 구현
+3. 적절한 디자인 패턴 사용
+4. 엔티티 간 명확한 경계 유지
 
 ## 엔티티 생성하기
 

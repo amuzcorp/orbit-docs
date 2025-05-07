@@ -16,7 +16,41 @@ export const sections = [
   { title: '설정 시딩', id: 'config-seeding' },
 ]
 
-# 사이트 설정 (SiteConfigs)
+# 사이트 설정
+
+사이트 설정을 통해 각 사이트의 동작을 관리하고 사용자 정의할 수 있습니다. 사이트별 설정을 저장하고 검색할 수 있는 유연한 방법을 제공합니다.
+
+## 주요 기능
+
+- **사이트별 설정**: 각 사이트에 대한 설정 구성
+- **환경 변수**: 환경별 설정 관리
+- **기본값**: 누락된 설정에 대한 대체값 설정
+- **유효성 검사**: 설정 값의 유효성 보장
+
+## 예시
+
+```typescript
+// 사이트 설정 예시
+interface SiteConfig {
+  id: string;
+  name: string;
+  domain: string;
+  settings: {
+    theme: string;
+    language: string;
+    timezone: string;
+    features: string[];
+  };
+  environment: 'development' | 'staging' | 'production';
+}
+```
+
+## 모범 사례
+
+1. 의미 있는 설정 키 사용
+2. 적절한 유효성 검사 구현
+3. 설정을 체계적으로 관리
+4. 모든 설정 옵션 문서화
 
 SiteConfigs는 CMS-Orbit에서 사이트 전반의 설정을 관리하기 위한 강력한 헬퍼 클래스입니다. 설정 그룹, 캐싱, 유효성 검사, 테넌트별 설정 등 다양한 기능을 제공합니다. {{ className: 'lead' }}
 

@@ -1,0 +1,122 @@
+# 사이트 관리
+
+이 가이드는 사이트 관리 방법에 대해 설명합니다.
+
+## 사이트 관리 기능
+
+- **사이트 목록**: 모든 사이트 조회 및 관리
+- **사이트 상태**: 사이트 상태 모니터링
+- **사용자 관리**: 사이트별 사용자 관리
+- **콘텐츠 관리**: 사이트별 콘텐츠 관리
+- **리소스 관리**: 사이트별 리소스 관리
+
+## 사이트 관리 방법
+
+### 1. 사이트 목록 조회
+
+```php {{ title: '사이트 목록 조회' }}
+use Orbit\Tenancy\Tenant;
+
+// 모든 사이트 조회
+$tenants = Tenant::all();
+
+// 활성화된 사이트만 조회
+$activeTenants = Tenant::where('status', 'active')->get();
+
+// 특정 조건으로 사이트 조회
+$filteredTenants = Tenant::where('created_at', '>=', now()->subDays(30))->get();
+```
+
+### 2. 사이트 상태 관리
+
+```php {{ title: '사이트 상태 관리' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사이트 상태 확인
+$status = $tenant->status();
+
+// 사이트 활성화
+$tenant->activate();
+
+// 사이트 비활성화
+$tenant->deactivate();
+
+// 사이트 일시 중지
+$tenant->suspend();
+```
+
+### 3. 사용자 관리
+
+```php {{ title: '사용자 관리' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 사용자 목록 조회
+$users = $tenant->users()->get();
+
+// 사용자 생성
+$user = $tenant->users()->create([
+    'name' => 'New User',
+    'email' => 'user@site-a.example.com',
+    'password' => Hash::make('password'),
+]);
+
+// 사용자 권한 관리
+$tenant->permissions()->assignRole($user, 'editor');
+```
+
+### 4. 콘텐츠 관리
+
+```php {{ title: '콘텐츠 관리' }}
+use Orbit\Tenancy\Tenant;
+
+$tenant = Tenant::find('site-a');
+
+// 콘텐츠 목록 조회
+$contents = $tenant->contents()->get();
+
+// 콘텐츠 생성
+$content = $tenant->contents()->create([
+    'title' => 'New Content',
+    'body' => 'Content body',
+    'status' => 'published',
+]);
+
+// 콘텐츠 업데이트
+$content->update([
+    'status' => 'draft',
+]);
+```
+
+## 사이트 관리 명령어
+
+```bash {{ title: '사이트 관리 명령어' }}
+# 사이트 목록 조회
+php artisan tenancy:list
+
+# 사이트 상태 확인
+php artisan tenancy:status site-a
+
+# 사이트 활성화
+php artisan tenancy:activate site-a
+
+# 사이트 비활성화
+php artisan tenancy:deactivate site-a
+```
+
+## 모범 사례
+
+1. 정기적인 사이트 상태 모니터링
+2. 사용자 권한 관리 철저히 하기
+3. 콘텐츠 백업 정기적으로 수행
+4. 리소스 사용량 모니터링
+5. 보안 설정 정기적으로 검토
+
+<div className="not-prose">
+  <Button href="/multi-site/site-settings" variant="text" arrow="right">
+    <>사이트 설정하기</>
+  </Button>
+</div> 

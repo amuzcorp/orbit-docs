@@ -1,0 +1,34 @@
+# Tenancy
+
+Tenancy is a crucial concept in multi-tenant applications. It allows you to isolate data and resources between different tenants while sharing the same application instance.
+
+## Key Concepts
+
+- **Tenant Isolation**: Separate data and resources for each tenant
+- **Shared Resources**: Efficiently share common resources
+- **Tenant Context**: Maintain tenant-specific context
+- **Security**: Ensure proper data isolation
+
+## Example
+
+```typescript
+// Example tenant configuration
+interface Tenant {
+  id: string;
+  name: string;
+  domain: string;
+  settings: {
+    database: string;
+    storage: string;
+    features: string[];
+  };
+  status: 'active' | 'inactive' | 'suspended';
+}
+```
+
+## Best Practices
+
+1. Implement proper tenant isolation
+2. Use efficient resource sharing
+3. Maintain clear tenant boundaries
+4. Implement proper security measures 

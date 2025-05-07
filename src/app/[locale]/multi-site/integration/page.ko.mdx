@@ -9,7 +9,59 @@ export const sections = [
   { title: '서비스 통합', id: 'service-integration' },
 ]
 
-# 사이트 통합
+# 멀티사이트 통합
+
+이 가이드는 여러 사이트를 애플리케이션에 통합하고 효과적으로 관리하는 방법을 설명합니다.
+
+## 주요 기능
+
+- **사이트 관리**: 단일 인터페이스에서 여러 사이트 관리
+- **콘텐츠 공유**: 사이트 간 콘텐츠 공유
+- **사용자 정의**: 각 사이트를 독립적으로 사용자 정의
+- **분석**: 사이트 간 성능 추적
+
+## 통합 단계
+
+1. 사이트 설정 구성:
+   ```typescript
+   interface SiteConfig {
+     id: string;
+     name: string;
+     domain: string;
+     settings: {
+       theme: string;
+       language: string;
+       features: string[];
+     };
+   }
+   ```
+
+2. 콘텐츠 공유 설정:
+   ```typescript
+   interface ContentShare {
+     sourceSite: string;
+     targetSite: string;
+     contentType: string;
+     syncStrategy: 'manual' | 'automatic';
+   }
+   ```
+
+3. 분석 구성:
+   ```typescript
+   interface AnalyticsConfig {
+     siteId: string;
+     trackingId: string;
+     events: string[];
+     customDimensions: Record<string, string>;
+   }
+   ```
+
+## 모범 사례
+
+1. 일관된 명명 규칙 사용
+2. 적절한 접근 제어 구현
+3. 사이트 성능 모니터링
+4. 정기적인 백업 및 유지보수
 
 CMS-Orbit의 통합 기능을 통해 각 사이트를 외부 시스템과 연동하고 데이터를 공유할 수 있습니다. {{ className: 'lead' }}
 

@@ -1,28 +1,17 @@
-export const metadata = {
-  title: '사이트 유지보수',
-  description: 'CMS-Orbit의 사이트 유지보수 기능에 대해 알아봅니다.',
-}
+# Multi-Site Maintenance
 
-export const sections = [
-  { title: '업데이트 관리', id: 'update-management' },
-  { title: '백업 및 복원', id: 'backup-restore' },
-  { title: '모니터링 및 로깅', id: 'monitoring-logging' },
-]
+This guide explains how to maintain and manage a multi-site application.
 
-# 멀티사이트 유지보수
+## Key Concepts
 
-이 가이드는 멀티사이트 애플리케이션의 유지보수와 관리에 대해 설명합니다.
+- **Backup and Recovery**: Safe backup and recovery of data and settings
+- **Monitoring**: System performance and status monitoring
+- **Updates**: System and site update management
+- **Troubleshooting**: Common problem resolution methods
 
-## 주요 개념
+## Maintenance Strategies
 
-- **백업 및 복구**: 데이터와 설정의 안전한 백업 및 복구
-- **모니터링**: 시스템 성능 및 상태 모니터링
-- **업데이트**: 시스템 및 사이트 업데이트 관리
-- **문제 해결**: 일반적인 문제 해결 방법
-
-## 유지보수 전략
-
-1. 백업 구성:
+1. Backup Configuration:
    ```typescript
    interface BackupConfig {
      type: 'full' | 'incremental';
@@ -41,7 +30,7 @@ export const sections = [
    }
    ```
 
-2. 모니터링 설정:
+2. Monitoring Configuration:
    ```typescript
    interface MonitoringConfig {
      metrics: {
@@ -61,7 +50,7 @@ export const sections = [
    }
    ```
 
-3. 업데이트 관리:
+3. Update Management:
    ```typescript
    interface UpdateConfig {
      strategy: 'rolling' | 'blue-green' | 'canary';
@@ -76,18 +65,18 @@ export const sections = [
    }
    ```
 
-## 모범 사례
+## Best Practices
 
-1. 정기적인 백업 수행
-2. 시스템 모니터링 유지
-3. 업데이트 계획 수립
-4. 문제 해결 문서화
+1. Perform regular backups
+2. Maintain system monitoring
+3. Plan updates
+4. Document troubleshooting
 
-## 백업 및 복구
+## Backup and Recovery
 
-### 백업 설정
+### Backup Configuration
 
-```php {{ title: '백업 설정' }}
+```php {{ title: 'Backup Configuration' }}
 // config/tenancy.php
 return [
     'backup' => [
@@ -109,46 +98,46 @@ return [
 ];
 ```
 
-### 백업 실행
+### Backup Execution
 
-```php {{ title: '백업 실행' }}
+```php {{ title: 'Backup Execution' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 전체 백업
+// Full backup
 $tenant->backup()->create([
     'type' => 'full',
     'include_files' => true,
     'include_database' => true,
 ]);
 
-// 증분 백업
+// Incremental backup
 $tenant->backup()->create([
     'type' => 'incremental',
     'since' => now()->subDay(),
 ]);
 ```
 
-### 복구 실행
+### Recovery Execution
 
-```php {{ title: '복구 실행' }}
+```php {{ title: 'Recovery Execution' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 백업에서 복구
+// Restore from backup
 $tenant->restore()->fromBackup($backupId);
 
-// 특정 시점으로 복구
+// Restore to point in time
 $tenant->restore()->toPointInTime($timestamp);
 ```
 
-## 모니터링
+## Monitoring
 
-### 메트릭 수집
+### Metric Collection
 
-```php {{ title: '메트릭 수집' }}
+```php {{ title: 'Metric Collection' }}
 // config/tenancy.php
 return [
     'monitoring' => [
@@ -166,9 +155,9 @@ return [
 ];
 ```
 
-### 알림 설정
+### Alert Configuration
 
-```php {{ title: '알림 설정' }}
+```php {{ title: 'Alert Configuration' }}
 // config/tenancy.php
 return [
     'alerts' => [
@@ -191,9 +180,9 @@ return [
 ];
 ```
 
-### 로깅 설정
+### Logging Configuration
 
-```php {{ title: '로깅 설정' }}
+```php {{ title: 'Logging Configuration' }}
 // config/tenancy.php
 return [
     'logging' => [
@@ -214,11 +203,11 @@ return [
 ];
 ```
 
-## 업데이트 관리
+## Update Management
 
-### 업데이트 전략
+### Update Strategy
 
-```php {{ title: '업데이트 전략' }}
+```php {{ title: 'Update Strategy' }}
 // config/tenancy.php
 return [
     'updates' => [
@@ -235,63 +224,63 @@ return [
 ];
 ```
 
-### 업데이트 실행
+### Update Execution
 
-```php {{ title: '업데이트 실행' }}
+```php {{ title: 'Update Execution' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 업데이트 시작
+// Start update
 $tenant->update()->start([
     'version' => '1.1.0',
     'strategy' => 'rolling',
 ]);
 
-// 업데이트 상태 확인
+// Check update status
 $status = $tenant->update()->status();
 
-// 업데이트 롤백
+// Rollback update
 $tenant->update()->rollback();
 ```
 
-## 문제 해결
+## Troubleshooting
 
-### 진단 도구
+### Diagnostic Tools
 
-```php {{ title: '진단 도구' }}
+```php {{ title: 'Diagnostic Tools' }}
 use Orbit\Tenancy\Tenant;
 
 $tenant = Tenant::find('site-a');
 
-// 시스템 상태 확인
+// Check system health
 $health = $tenant->diagnose()->check();
 
-// 성능 분석
+// Analyze performance
 $performance = $tenant->diagnose()->analyze();
 
-// 문제 해결
+// Troubleshoot issues
 $solution = $tenant->diagnose()->troubleshoot($issue);
 ```
 
-### 유지보수 명령어
+### Maintenance Commands
 
-```bash {{ title: '유지보수 명령어' }}
-# 백업 생성
+```bash {{ title: 'Maintenance Commands' }}
+# Create backup
 php artisan tenancy:backup site-a
 
-# 상태 확인
+# Check status
 php artisan tenancy:status site-a
 
-# 업데이트 실행
+# Run update
 php artisan tenancy:update site-a
 
-# 문제 진단
+# Diagnose issues
 php artisan tenancy:diagnose site-a
 ```
 
 <div className="not-prose">
   <Button href="/multi-site/scaling" variant="text" arrow="right">
-    <>사이트 스케일링 알아보기</>
+    <>Learn about Site Scaling</>
   </Button>
 </div> 

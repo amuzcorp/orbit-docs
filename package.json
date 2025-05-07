@@ -23,6 +23,7 @@
     "acorn": "^8.8.1",
     "clsx": "^2.1.0",
     "fast-glob": "^3.3.0",
+    "firebase": "^11.6.1",
     "flexsearch": "^0.7.31",
     "framer-motion": "^10.18.0",
     "i18next": "^24.2.2",

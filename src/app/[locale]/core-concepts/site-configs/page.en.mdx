@@ -1,0 +1,35 @@
+# Site Configurations
+
+Site configurations allow you to manage and customize the behavior of your sites. They provide a flexible way to store and retrieve site-specific settings.
+
+## Key Features
+
+- **Site-specific Settings**: Configure settings for each site
+- **Environment Variables**: Manage environment-specific configurations
+- **Default Values**: Set fallback values for missing configurations
+- **Validation**: Ensure configuration values are valid
+
+## Example
+
+```typescript
+// Example site configuration
+interface SiteConfig {
+  id: string;
+  name: string;
+  domain: string;
+  settings: {
+    theme: string;
+    language: string;
+    timezone: string;
+    features: string[];
+  };
+  environment: 'development' | 'staging' | 'production';
+}
+```
+
+## Best Practices
+
+1. Use meaningful configuration keys
+2. Implement proper validation
+3. Keep configurations organized
+4. Document all configuration options 

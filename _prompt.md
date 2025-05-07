@@ -27,7 +27,7 @@ export const sections = [
 
 페이지에 대한 간단한 소개 문단. {{ className: 'lead' }}
 
-## 섹션 제목
+## 섹션 제목 \{#section-id\}
 
 섹션 내용 설명
 

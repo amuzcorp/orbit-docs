@@ -1,0 +1,36 @@
+# Entities
+
+Entities are the core business objects in your application. They represent the main concepts and data structures that your application works with.
+
+## Key Features
+
+- **Identity**: Each entity has a unique identifier
+- **Properties**: Define the characteristics of the entity
+- **Behavior**: Define how the entity interacts with other entities
+- **Lifecycle**: Manage the entity's state throughout its existence
+
+## Example
+
+```typescript
+// Example entity definition
+interface ProductEntity {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  
+  // Methods
+  updateStock(quantity: number): void;
+  isInStock(): boolean;
+  calculateDiscount(percentage: number): number;
+}
+```
+
+## Best Practices
+
+1. Keep entities focused on business logic
+2. Implement proper validation
+3. Use appropriate design patterns
+4. Maintain clear boundaries between entities 
