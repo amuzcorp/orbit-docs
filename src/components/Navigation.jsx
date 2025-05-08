@@ -218,7 +218,9 @@ export const navigation = [
   {
     title: '시작하기',
     links: [
-      { title: '소개', href: '/introduction' },
+      { title: 'CMS-Orbit란?', href: '/introduction/what-is-cms-orbit' },
+      { title: '주요 기능', href: '/introduction/features' },
+      { title: '시스템 요구사항', href: '/introduction/requirements' },
       { title: '설치', href: '/installation' },
       { title: '빠른 시작', href: '/quick-start' },
     ],
@@ -235,12 +237,11 @@ export const navigation = [
   {
     title: '멀티사이트',
     links: [
-      { title: '개요', href: '/multi-site' },
-      { title: '사이트 생성', href: '/multi-site/site-creation' },
-      { title: '사이트 관리', href: '/multi-site/site-management' },
-      { title: '사이트 설정', href: '/multi-site/site-settings' },
-      { title: '사이트 스케일링', href: '/multi-site/scaling' },
-      { title: '사이트 통합', href: '/multi-site/integration' },
+      { title: '멀티사이트 기본', href: '/multi-site/basics' },
+      { title: '사이트 관리', href: '/multi-site/management' },
+      { title: '사이트 격리', href: '/multi-site/isolation' },
+      { title: '사이트 이벤트', href: '/multi-site/events' },
+      { title: '사이트 미들웨어', href: '/multi-site/middleware' },
     ],
   },
   {
